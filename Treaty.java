@@ -13,15 +13,15 @@ class Treaty {
 
 	public Treaty(String serSvc, String cliSvc, int id, 
                 String s, String c, Vector params, Vector retvals) {    ID = id;    clientHabitat = c;    serverHabitat = s;    clientHabService = cliSvc;
-    serverHabService = serSvc;        allowed_params = new Vector(numParams);    allowed_retvals = new Vector(numRetVals);        numParameters = allowed_params.size();    numReturnValues = allowed_retvals.size();
+    serverHabService = serSvc;        allowed_params = new Vector(params);    allowed_retvals = new Vector(retvals);        numParameters = allowed_params.size();    numReturnValues = allowed_retvals.size();
 	}
 
 	//////////////////////////////////////////////////////
 	// 				general getter functions
 	//////////////////////////////////////////////////////
-	String getServiceUsed() { return service;	    }
-	int    getID()          { return ID;          }
-	int    get_IP_size()    { return numIPparams; }
+	String getServiceUsed() { return serverHabService; }
+	int    getID()          { return ID;               }
+	int    get_IP_size()    { return numParameters;    }
 	  //////////////////////////////////////////////////////
 	// 				functions for input params 
 	//////////////////////////////////////////////////////
