@@ -32,7 +32,7 @@ public class HelloServer extends psl.habitats.ServiceInterface {
 		roleName = "HelloServer";
 	}
 	
-  // public static void main(String args[]) {
+   // public static void main(String args[]) {
 	 public void initialize() {
 		String init_args[] = {"-ORBInitialPort", "1050", "-ORBInitialHost", "localhost"};
 		System.out.println("init_args" + init_args.length);
@@ -79,6 +79,7 @@ public class HelloServer extends psl.habitats.ServiceInterface {
       System.out.println("HelloServer Exiting ...");
   }
 	public void startDisplay() {}
+	public Vector performService(Hashtable ipList) {}
 
 }
 
