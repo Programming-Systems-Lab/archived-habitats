@@ -22,8 +22,8 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 public class HabitatPortal extends JFrame {
-  private static final int WIDTH = 400;
-  private static final int HEIGHT = 200;
+  private static final int WIDTH = 800;
+  private static final int HEIGHT = 600;
   private static final int CTRL_WIDTH = 200;
   
   private final Hashtable _portals;

@@ -48,7 +48,7 @@ public class EventService implements ServiceInterface {
   private String phaseOneData;
 	public JPanel startDisplay(){
     // start the GUI here
-    final JPanel panel = new JPanel(new GridLayout(10, 1));    
+    final JPanel panel = new JPanel(new GridLayout(20, 1));    
     final JLabel label = new JLabel("Enter name: ");
     final JTextField text = new JTextField(20);    JButton button = new JButton("Action!");    panel.add(new JLabel("FOR USE BY AUTHORISED PERSONNEL!"));
     {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Type of Event: "));p.add(new JTextField(10));panel.add(p);}    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Available Data: "));p.add(new JTextField(10));panel.add(p);}
