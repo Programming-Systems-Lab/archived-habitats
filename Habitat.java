@@ -5,11 +5,12 @@ import java.util.*;
 
 
 public class Habitat {
-  String roleName;
+  String roleName, category;
   Hashtable serviceObjects;
     
-  public Habitat(String name) {
+  public Habitat(String name, String c) {
 		roleName = name;
+		category = c;
 		serviceObjects = new Hashtable();
 		FileIO fileRW = new FileIO();
 		Hashtable serviceList;
@@ -42,9 +43,15 @@ public class Habitat {
 		gk = new GateKeeper();
 		fe = new FrontEnd();
   }
+		public String getName() {
+			return roleName;
+		}
+		public String getCategory() {
+			return category;
+		}
 
   public static void main(String arg[]) {
-	  Habitat myFirstHabitat = new Habitat("AlpaChristy");
+	  Habitat myFirstHabitat = new Habitat("AlpaChristy", "general");
 		System.out.println("Done");
 	}
 }
