@@ -1,18 +1,12 @@
 package psl.habitats;
 
-public class ServiceInterface {
-  public String roleName;
+import java.util.Vector;
+import java.util.Hashtable;
+public interface ServiceInterface {
+  public void initialize();
+  public String getName();
+	public void startDisplay();
+	public Vector performService(Hashtable ipList);
 
-    public ServiceInterface() {}
-
-    public void initialize() {}
-
-    public String getName() {
-	    return roleName; 
-    }
-		
-		public void startDisplay() {}
-		public Vector performService(Hashtable ipList) {}
-
-		// public void startDisplay(Graphics g){} 
+	// public void startDisplay(Graphics g){} 
 }

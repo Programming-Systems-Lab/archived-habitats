@@ -14,14 +14,14 @@ public class GateKeeper implements Notifiable {
 	static private Habitat masterHabitat;
 	static private Hashtable summits_list; 
 	static private Hashtable currServiceReqList; 
-	static private String sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";
+	static private String sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";  static private HierarchicalDispatcher hd = null;
 
 	public GateKeeper(Habitat h) {
 		masterHabitat = h;
 		summits_list = new Hashtable();
 		// connect to siena
 		// Alpa : will read senp host from properties file
-		HierarchicalDispatcher hd = new HierarchicalDispatcher();
+		hd = new HierarchicalDispatcher();
     try {   
       hd.setMaster(sienaMaster);
       System.out.println(": master is " + sienaMaster);
@@ -55,12 +55,13 @@ public class GateKeeper implements Notifiable {
 		n.putAttribute("source", masterHabitat.getName());
 		n.putAttribute("requestingService", serName);     
 		try {
-			n.publish();
-		} catch(siena.InvalidHandleException se) {
+			hd.publish(n);
+		} catch(siena.SienaException se) {
 			se.printStackTrace();
 		}
 		currServiceReqList.put(serName, n);
-	}
+	}    private boolean allowed(String _sName, String _sDesc) {
+    return true;  }
 
 	private void create_treaty(String src, String dest, int ID, java.lang.Object ip_param, java.lang.Object ret_param, int numIP) {
 		Treaty curr_treaty = new Treaty(src, dest, ID, numIP);
@@ -80,8 +81,8 @@ public class GateKeeper implements Notifiable {
 		// create a new treaty and add it to the list of sumits
 		// if security cleared create a proxy of the service object
 
-		String srcHabitat, srcService;
-		int totalIP, totalOP;
+		String srcHabitat = null, srcService = null;
+		int totalIP = 0, totalOP = 0;
 		Notification res_notif = new Notification();
 		AttributeValue av = n_request.getAttribute("source");
 		if (av != null) 
@@ -138,7 +139,7 @@ public class GateKeeper implements Notifiable {
 			res_notif.putAttribute("Access", "Denied");
 		}
 		try {
-			s.publish(res_notif);
+			hd.publish(res_notif);
 		} catch (siena.SienaException se) {
 			se.printStackTrace();
 		}
@@ -151,18 +152,18 @@ public class GateKeeper implements Notifiable {
 		int ID;
 		if (av != null) {
 			if ((av.stringValue()).equals("Allowed")) {
-				AttributeValue = n.getAttribute("ID");
+				av = n.getAttribute("ID");
 				if (av != null) {
-					ID = av.intValue();
-					Notification serv_old_notif = (Vector)currServiceReqList.get(serName);
+					ID = av.intValue();          String serName = n.getAttribute("RequestingService").stringValue();
+					Notification serv_old_notif = (Notification) currServiceReqList.get(serName);
 					Vector ip = get_IP_params_from_Notification(serv_old_notif);
 					Vector op = get_IP_params_from_Notification(serv_old_notif);
 					String srcHabitat = serv_old_notif.getAttribute("habitatName").stringValue();
-					creaty_treaty(srcHabitat, masterHabitat.getName(), ID, ip, ip.size());
+					create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op, ip.size());
 				// masterHabitat.notifyService(); .. wake up the service waiting for this
 					Filter f1 = new Filter();
 					f1.addConstraint("CurrentSummitID", ID);
-					FilterThread f_summit = new FilterThread(f1, new SummitHandler(ID, this));
+					FilterThread f_summit = new FilterThread(hd, f1, new SummitHandler(ID, this));
 					}
 			}
 			else {
@@ -209,8 +210,8 @@ public class GateKeeper implements Notifiable {
 
 				for (int _v = 0; _v < result2Bsent.size(); _v++) {
 					MyAttributeValuePair _avp = (MyAttributeValuePair) result2Bsent.elementAt(_v);
-					if(currTreaty.valid_op_list(_avp.getValue) {
-						send_notif.putAttribute(_avp.attribute,_avp.getValue);
+					if (currTreaty.valid_op_param(_avp.getValue())) {
+						send_notif.putAttribute(_avp.getAttribute(), _avp.getValue());
 					}
 					else {
 						send_notif.clear();
@@ -220,5 +221,5 @@ public class GateKeeper implements Notifiable {
 				}
 			}
 		}
-	};
+	}
 }
