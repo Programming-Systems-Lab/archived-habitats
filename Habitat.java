@@ -7,7 +7,7 @@ import java.util.*;
 public class Habitat {
   String roleName, category;
   Hashtable serviceObjects;
-	GateKeeper gk;
+	public final GateKeeper gk;
   public Habitat(String name, String c, String file, String sienaMaster) {
 		roleName = name;
 		category = c;
@@ -17,9 +17,6 @@ public class Habitat {
 		FrontEnd fe;
 		Console ad = new Console();
 
-		// register with HRC
-		fileRW.writeFile(".HRCList", roleName);
-	
 	  ad.cf_show("Admin Frame");
 		ad.cf_show("Admin Console");
 
