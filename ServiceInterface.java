@@ -2,11 +2,12 @@ package psl.habitats;
 
 import java.util.Vector;
 import java.util.Hashtable;
-public interface ServiceInterface {
+
+public interface ServiceInterface {
   public void initialize();
-  public String getName();
+  public String getDescription();
 	public void startDisplay();
-	public Vector performService(Hashtable ipList);
+	public Hashtable performService(Hashtable ipList);
 
 	// public void startDisplay(Graphics g){} 
 }

@@ -14,7 +14,8 @@ public class GateKeeper implements Notifiable {
 	static private Habitat masterHabitat;
 	static private Hashtable summits_list; 
 	static private Hashtable currServiceReqList; 
-	static private String sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";  static private HierarchicalDispatcher hd = null;
+	static private String sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";
+  static private HierarchicalDispatcher hd = null;
 
 	public GateKeeper(Habitat h) {
 		masterHabitat = h;
@@ -60,8 +61,11 @@ public class GateKeeper implements Notifiable {
 			se.printStackTrace();
 		}
 		currServiceReqList.put(serName, n);
-	}    private boolean allowed(String _sName, String _sDesc) {
-    return true;  }
+	}
+  
+  private boolean allowed(String _sName, String _sDesc) {
+    return true;
+  }
 
 	private void create_treaty(String src, String dest, int ID, java.lang.Object ip_param, java.lang.Object ret_param, int numIP) {
 		Treaty curr_treaty = new Treaty(src, dest, ID, numIP);
@@ -81,7 +85,7 @@ public class GateKeeper implements Notifiable {
 		// create a new treaty and add it to the list of sumits
 		// if security cleared create a proxy of the service object
 
-		String srcHabitat = null, srcService = null;
+		String srcHabitat = null, srcServiceDes = null, req4serDes = null;
 		int totalIP = 0, totalOP = 0;
 		Notification res_notif = new Notification();
 		AttributeValue av = n_request.getAttribute("source");
@@ -89,7 +93,9 @@ public class GateKeeper implements Notifiable {
 			srcHabitat = av.stringValue();
 		av = n_request.getAttribute("requestingService");
 		if (av != null) srcService = av.stringValue();
-		av = n_request.getAttribute("totalPpparams");
+		av = n_request.getAttribute("Request4Service");
+		if (av != null) req4serDes = av.stringValue();
+		av = n_request.getAttribute("totalIPparams");
 		if (av != null) totalIP = av.intValue();						// total imput parameters
 		av = n_request.getAttribute("totaOPpparams");
 		if (av != null)	
@@ -131,6 +137,7 @@ public class GateKeeper implements Notifiable {
 			}
 			create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op,(1+totalIP));
 			// create a new treaty and a new proxy for the requested service
+			// create_treaty(srcHabitat, masterHabitat.getName(),srcService,req4serDes,ID, ip, op,(1+totalIP));
 		}
 		else {
 			// send a -ve response
@@ -154,13 +161,14 @@ public class GateKeeper implements Notifiable {
 			if ((av.stringValue()).equals("Allowed")) {
 				av = n.getAttribute("ID");
 				if (av != null) {
-					ID = av.intValue();          String serName = n.getAttribute("RequestingService").stringValue();
+					ID = av.intValue();
+					String serName = n.getAttribute("RequestingService").stringValue();
 					Notification serv_old_notif = (Notification) currServiceReqList.get(serName);
 					Vector ip = get_IP_params_from_Notification(serv_old_notif);
 					Vector op = get_IP_params_from_Notification(serv_old_notif);
 					String srcHabitat = serv_old_notif.getAttribute("habitatName").stringValue();
 					create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op, ip.size());
-				// masterHabitat.notifyService(); .. wake up the service waiting for this
+					// masterHabitat.notifyService(); .. wake up the service waiting for this
 					Filter f1 = new Filter();
 					f1.addConstraint("CurrentSummitID", ID);
 					FilterThread f_summit = new FilterThread(hd, f1, new SummitHandler(ID, this));
@@ -204,7 +212,7 @@ public class GateKeeper implements Notifiable {
 			  	}
 			  }
 
-				// this must be replaced by a lookup on a corba object
+				// might be replaced by a lookup on a corba object
 				ServiceInterface _service = masterHabitat.getService(currTreaty.servUsed);
 				Vector result2Bsent = _service.performService(forService);
 

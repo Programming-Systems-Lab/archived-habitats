@@ -52,7 +52,9 @@ public class Habitat {
 	public ServiceInterface getService(String _svdes) {
 		return((ServiceInterface)serviceObjects.get(_svdes));
 	}
-
+  static public boolean localService(String servDes) {
+    return false;
+  }
   public static void main(String arg[]) {
 	  Habitat myFirstHabitat = new Habitat("AlpaChristy", "general");
 		System.out.println("Done");
