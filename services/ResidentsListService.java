@@ -43,9 +43,7 @@ public class ResidentsListService implements ServiceInterface {
   private static final String key9 = "Age";
 
   public Hashtable performService(String _senderService, Hashtable ipList) {
-
-    masterHabitat.svclog(myDescription, myDescription + ": performService for " + _senderService);
-
+    masterHabitat.log(myDescription + ": performService for " + _senderService);
     Hashtable result = new Hashtable();
     if (ipList.containsKey(key1) && ipList.containsKey(key2)) {
       result.put(key5, lookup("" + ipList.get(key1), key5, masterHabitat.getName()));
@@ -55,8 +53,7 @@ public class ResidentsListService implements ServiceInterface {
       result.put(key9, lookup("" + ipList.get(key1), key9, masterHabitat.getName()));                                                                           
     } else 
       result = null;
-
-    masterHabitat.svclog(myDescription, myDescription + ": returning requested data ");
+    masterHabitat.log(myDescription + ": returning requested data ");
     return result;
   }
 

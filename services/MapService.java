@@ -5,7 +5,7 @@ import psl.habitats.*;
 import javax.swing.*;
 import java.util.Hashtable;
 
-public class MapService implements ServiceInterface {    private static String serviceDescription = "MapService";
+public class MapService implements ServiceInterface {    private static String serviceDescription = "MapService";
   public MapService() {	}
   public void initialize(Habitat _h) { }
   public String getDescription() {
