@@ -2,52 +2,44 @@ package psl.habitats;
 import java.util.Vector;
 
 class Treaty {
-	String src;
-	String dest;
-	String servUsed;
-	int ID;
-	int numIPparams;
-	Vector allowed_ip_param = new Vector();
-	Vector allowed_op_param = new Vector();
+	final int ID;
+	final String clientHabitat;
+	final String serverHabitat;  final String clientHabService;
+	final String serverHabService;
+  final int numParameters;
+  final int numReturnValues;
+  final Vector allowed_params;
+	final Vector allowed_retvals;
 
-	public Treaty (String s, String d, int i, int t) {
-		src = s;
-		dest = d;
-		ID = i;
-		numIPparams = t;
+	public Treaty(String serSvc, String cliSvc, int id, 
+                String s, String c, Vector params, Vector retvals) {    ID = id;    clientHabitat = c;    serverHabitat = s;    clientHabService = cliSvc;
+    serverHabService = serSvc;        allowed_params = new Vector(numParams);    allowed_retvals = new Vector(numRetVals);        numParameters = allowed_params.size();    numReturnValues = allowed_retvals.size();
 	}
 
 	//////////////////////////////////////////////////////
-	// 				general getter setter functions
+	// 				general getter functions
 	//////////////////////////////////////////////////////
-	String getServUsed() {
-		return servUsed;
-	}
-	int getID() {
-		return ID;
-	}
-
-	int get_IP_size() {
-		return numIPparams;
-	}
-	//////////////////////////////////////////////////////
+	String getServiceUsed() { return service;	    }
+	int    getID()          { return ID;          }
+	int    get_IP_size()    { return numIPparams; }
+	  //////////////////////////////////////////////////////
 	// 				functions for input params 
 	//////////////////////////////////////////////////////
 
 	public void add_ip_param(Object param) {
-		allowed_ip_param.add(param);
+		allowed_params.add(param);
 	}
 	public void add_ip_list(Vector param_list) {
-		allowed_ip_param.addAll(param_list);
+		allowed_params.addAll(param_list);
 	}
 	public boolean valid_ip_param(Object param) {
-		return (allowed_ip_param.contains(param));
+		return (allowed_params.contains(param));
 	}
 	public boolean valid_ip_list(Vector param_list) {
-		return (allowed_ip_param.containsAll(param_list));
+		return (allowed_params.containsAll(param_list));
 	}
 	public Vector getIPList() {
-		return (allowed_ip_param);
+		return (allowed_params);
 	}
 
 	//////////////////////////////////////////////////////
@@ -55,15 +47,15 @@ class Treaty {
 	//////////////////////////////////////////////////////
 	
 	public void add_op_param(Object param) {
-		allowed_op_param.add(param);
+		allowed_retvals.add(param);
 	}
 	public void add_op_list(Vector param_list) {
-		allowed_op_param.addAll(param_list);
+		allowed_retvals.addAll(param_list);
 	}
 	public boolean valid_op_param(Object param) {
-		return (allowed_op_param.contains(param));
+		return (allowed_retvals.contains(param));
 	}
 	public boolean valid_op_list(Vector param_list) {
-		return (allowed_op_param.containsAll(param_list));
+		return (allowed_retvals.containsAll(param_list));
 	}
 }

@@ -7,7 +7,6 @@ public interface ServiceInterface {
   public void initialize();
   public String getDescription();
 	public void startDisplay();
-	public Hashtable performService(Hashtable ipList);
-
+  public Hashtable performService(String _senderService, Hashtable ipList);
 	// public void startDisplay(Graphics g){} 
 }

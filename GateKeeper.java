@@ -1,5 +1,6 @@
 package psl.habitats;
 import java.io.*;
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.Hashtable;
 import siena.*;
@@ -31,44 +32,64 @@ public class GateKeeper implements Notifiable {
     } catch (IOException ioe) {
       ioe.printStackTrace();
     }
-    Filter f1 = new Filter();
-    f1.addConstraint("habitatCategory", masterHabitat.getCategory());
-    f1.addConstraint("habitatName", masterHabitat.getName());
+    Filter filter = null;
 
-    FilterThread t = new FilterThread(hd, f1, this);
-    t.start();
+    filter = new Filter();
+    filter.addConstraint("habitatCategory", masterHabitat.getCategory());
+    new FilterThread(hd, filter, this).start();
+    
+    filter = new Filter();
+    filter.addConstraint("habitatName", masterHabitat.getName());
+    new FilterThread(hd, filter, this).start();
   }
+  
+  public void notify(Notification[] e) {}
   public void notify(Notification n) {
     AttributeValue rav = n.getAttribute("EventType");
     if (rav == null) {
 			System.out.println("Received a null attribute for: EventType");
 			return;
 		}
+    
 		String av = rav.stringValue();
 		if(av == "ServiceRequest");
 			processServiceRequest(n);
+      
 		if(av == "Response2ServiceRequest");
 			processResponse2ServiceRequest(n);
 	}
-  public void notify(Notification[] e) {}
 
-	public void broadcast_req(String serName, siena.Notification n) {
+	public void broadcast_req(String serName, Hashtable h) {
+    // maintain local reference to hashTable: h
+    currServiceReqList.put(serName, h);
+    
+    Notification n = new siena.Notification();
+    for (Enumeration e=h.keys(); e.hasMoreElements(); ) {
+      String key = e.nextElement().toString();
+      n.putAttribute(key, h.get(key));
+    }
 		n.putAttribute("source", masterHabitat.getName());
 		n.putAttribute("requestingService", serName);     
+    
 		try {
+      // send out event
 			hd.publish(n);
-		} catch(siena.SienaException se) {
+		} catch (siena.SienaException se) {
 			se.printStackTrace();
 		}
-		currServiceReqList.put(serName, n);
 	}
-  
+
   private boolean allowed(String _sName, String _sDesc) {
     return true;
   }
 
-	private void create_treaty(String src, String dest, int ID, java.lang.Object ip_param, java.lang.Object ret_param, int numIP) {
-		Treaty curr_treaty = new Treaty(src, dest, ID, numIP);
+  /**
+   * @deprecated
+   */
+	private void create_treaty(String src, String dest, int ID, 
+                             java.lang.Object ip_param, java.lang.Object ret_param, 
+                             int numIP, int numOp) {
+		Treaty curr_treaty = new Treaty(src, dest, ID, numIP, numOP);
 		if (ip_param instanceof Vector) {
 			curr_treaty.add_ip_list((Vector)ip_param);
 		}
@@ -76,7 +97,7 @@ public class GateKeeper implements Notifiable {
 		summits_list.put(new Integer(ID),curr_treaty);
 	}
 	private int getNextID() {
-		return 0;
+		return Math.random() * 1000;
 	}
 
 	public void processServiceRequest(Notification n_request) {
@@ -86,21 +107,25 @@ public class GateKeeper implements Notifiable {
 		// if security cleared create a proxy of the service object
 
 		String srcHabitat = null, srcServiceDes = null, req4serDes = null;
-		int totalIP = 0, totalOP = 0;
+		int totalParams = 0, totalRetvals = 0;
 		Notification res_notif = new Notification();
+    
 		AttributeValue av = n_request.getAttribute("source");
-		if (av != null) 
-			srcHabitat = av.stringValue();
-		av = n_request.getAttribute("requestingService");
+		if (av != null) srcHabitat = av.stringValue();
+		
+    av = n_request.getAttribute("requestingService");
 		if (av != null) srcService = av.stringValue();
-		av = n_request.getAttribute("Request4Service");
+		
+    av = n_request.getAttribute("Request4Service");
 		if (av != null) req4serDes = av.stringValue();
-		av = n_request.getAttribute("totalIPparams");
-		if (av != null) totalIP = av.intValue();						// total imput parameters
-		av = n_request.getAttribute("totaOPpparams");
-		if (av != null)	
-			totalOP = av.intValue(); 	// total output parameters 
-		if(allowed(srcHabitat,srcService)) {
+		
+    av = n_request.getAttribute("totalParams");
+		if (av != null) totalParams = av.intValue();		// total parameters
+		
+    av = n_request.getAttribute("totalRetvals");
+		if (av != null)	totalRetvals = av.intValue(); 	// total return values 
+		
+    if(allowed(srcHabitat,srcService)) {
 			// send a +ve response
 			int ID = getNextID();
 			res_notif.putAttribute("habitatName", srcHabitat);
@@ -116,26 +141,23 @@ public class GateKeeper implements Notifiable {
 			res_notif.putAttribute("requestingService" , srcService);
 			res_notif.putAttribute("IDnumber", ID); 
 			
-			Vector ip = new Vector();
-			Vector op = new Vector();
-			int ind;
-			for (ind =1; ind <= totalIP; ind++) {
-				String att = "param";
-				att += ind;
-				av = n_request.getAttribute(att);
-				if (av != null) {
-					ip.add(av.stringValue());
-				}
+			Vector params = new Vector();
+			Vector retvals = new Vector();
+
+      for (int i=1; i<=totalParams; i++) {
+				av = n_request.getAttribute("params" + i);
+				if (av != null) params.add(av.stringValue());
 			}
-			for (ind =1; ind <= totalOP; ind++) {
-				String att = "retParam";
-				att += ind;
-				av = n_request.getAttribute(att);
-				if (av != null) {
-					op.add(av.stringValue());
-				}
+      
+			for (int i=1; i<=totalRetvals; i++) {
+				av = n_request.getAttribute("revals" + i);
+				if (av != null) retvals.add(av.stringValue());
 			}
-			create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op,(1+totalIP));
+
+      summits_list.put(new Integer(ID), 
+                       new Treaty(req4serDes, srcServiceDes, ID, 
+                                  srcHabitat, masterHabitat.getName(), 
+                                  params, retvals));
 			// create a new treaty and a new proxy for the requested service
 			// create_treaty(srcHabitat, masterHabitat.getName(),srcService,req4serDes,ID, ip, op,(1+totalIP));
 		}
@@ -145,56 +167,128 @@ public class GateKeeper implements Notifiable {
 			res_notif.putAttribute("EventType", "Response2ServiceRequest");
 			res_notif.putAttribute("Access", "Denied");
 		}
+    
 		try {
+      // treaty created, now send reply to requesting habService
 			hd.publish(res_notif);
 		} catch (siena.SienaException se) {
 			se.printStackTrace();
 		}
 	}
+  
 	private Vector get_IP_params_from_Notification(Notification n) {
 		return (new Vector());
 	}
-	public void processResponse2ServiceRequest(Notification n) {
-		AttributeValue av = n.getAttribute("Access");
-		int ID;
-		if (av != null) {
-			if ((av.stringValue()).equals("Allowed")) {
-				av = n.getAttribute("ID");
-				if (av != null) {
-					ID = av.intValue();
-					String serName = n.getAttribute("RequestingService").stringValue();
-					Notification serv_old_notif = (Notification) currServiceReqList.get(serName);
-					Vector ip = get_IP_params_from_Notification(serv_old_notif);
-					Vector op = get_IP_params_from_Notification(serv_old_notif);
-					String srcHabitat = serv_old_notif.getAttribute("habitatName").stringValue();
-					create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op, ip.size());
-					// masterHabitat.notifyService(); .. wake up the service waiting for this
-					Filter f1 = new Filter();
-					f1.addConstraint("CurrentSummitID", ID);
-					FilterThread f_summit = new FilterThread(hd, f1, new SummitHandler(ID, this));
-					}
-			}
-			else {
-				System.out.println("Access Denied");
-				// masterHabitat.notifyService(); .. wake up the service waiting for this failure notification
-			}
-		// response to the service request
-		// create a treaty with the params 
-		// save the ID number recieved by the remote GK
-		// notify the service to start using the service
-	}
-}
+  
+  public void processResponse2ServiceRequest(Notification n) {
+    AttributeValue av = n.getAttribute("Access");
+    int ID;
+    if (av != null) {
+      if ((av.stringValue()).equals("Allowed")) {
+        av = n.getAttribute("ID");
+        if (av != null) {
+          ID = av.intValue();
+          String clientHabService = n.getAttribute("RequestingService").stringValue();
+          String serverHabService = n.getAttribute("Request4Service").stringValue();
+          String serverHabitat = oldHash.get("habitatCategory") + "";
+          
+          Hashtable oldHash = (Hashtable) currServiceReqList.get(clientHabService);
+          int totalParams = Integer.parseInt("" + oldHash.get("totalParams"));
+          int totalRetvals = Integer.parseInt("" + oldHash.get("totalRetvals"));
+
+          // figure out num params/retvals
+          Vector params = new Vector(totalParams), retvals = new Vector(totalRetvals);
+          for (int i=0; i<totalParams; i++) params.add(oldHash.get("params" + i));
+          for (int i=0; i<totalRetvals; i++) retvals.add(oldHash.get("retvals" + i));
+
+          Treaty t = null; 
+          summits_list.put(new Integer(ID), 
+                           t = new Treaty(serverHabService, clientHabService, ID, 
+                                      serverHabitat, masterHabitat.getName(),
+                                      params, retvals));
+
+          // treaty created, now notify requesting habService
+          Hashtable newHash
+            = masterHabitat.getService(serName).performService(serverHabService, null);
+          
+          n = new siena.Notification();
+          for (Enumeration e = newHash.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement().toString();
+            if (t.valid_ip_param(key)) n.putAttribute(key, newHash.get(key));
+          }
+          n.putAttribute("CurrentSummitID", "" + ID);
+          n.putAttribute("habitatCategory", "" + masterHabitat.getName());
+          
+          Filter f1 = new Filter();
+          f1.addConstraint("CurrentSummitID", ID);
+          f1.addConstraint("habitatCategory", serverHabitat);
+          
+          new FilterThread(hd, f1, new SummitHandler(t, this)).start();
+          
+          // send out to server 
+          hd.publish(n);
+          
+        } else { /* nothing */ }
+      } else {
+        System.out.println("Access Denied");
+        // masterHabitat.notifyService(); .. wake up the service waiting for this failure notification
+      }
+      // response to the service request
+      // create a treaty with the params 
+      // save the ID number recieved by the remote GK
+      // notify the service to start using the service
+    } else { /* nothing */ }
+  }
 	
 	class SummitHandler implements Notifiable {
-	  int ID;
-		GateKeeper masterGK;
-		public SummitHandler(int _ID, GateKeeper _gk) {
-			ID = _ID;
+    final Treaty treaty;
+		final GateKeeper masterGK;
+		public SummitHandler(Treaty _t, GateKeeper _gk) {
+      treaty = _t;
 			masterGK = _gk;
 		}
   	public void notify(Notification n[]) {}
   	public void notify(Notification n) {
-			Notification send_notif = new Notification();
+      
+      // need validation in here
+      
+      Notification send_notif = new Notification();
+      Hashtable retvals = new Hashtable();
+      for (Iterator i = n.iterator(); i.hasNext(); ) {
+        String key = "" + i.next();
+        if (!key.equals("CurrentSummitID") && !key.equals("habitatCategory")) {
+          if (treaty.valid_ip_param(key) || treaty.valid_op_param(key)) {
+            retvals.put(key, n.getAttribute(key).stringValue());            
+          } else {
+            send_notif.clear();
+            send_notif.putAttribute("Terminate Summit" , "Invalid number of params");
+		  		  return;
+          }
+        }
+      }
+ 
+      ServiceInterface sInf = masterHabitat.getService(treaty.clientHabService);
+      Hashtable newHash = sInf.performService(treaty.serverHabService, retvals);
+
+      send_notif = new siena.Notification();
+      for (Enumeration e = newHash.keys(); e.hasMoreElements(); ) {
+        String key = e.nextElement().toString();
+        if (t.valid_ip_param(key)) 
+          send_notif.putAttribute(key, newHash.get(key));
+        else {
+          send_notif.clear();
+          send_notif.putAttribute("Terminate Summit" , "Invalid number of params");
+				  return;
+        }
+      }
+      n.putAttribute("CurrentSummitID", "" + ID);
+      n.putAttribute("habitatCategory", "" + masterHabitat.getName());
+          
+      // send out to server 
+      hd.publish(send_notif);
+      
+      
+      /* Notification send_notif = new Notification();
 			send_notif.putAttribute("currentSummitID", ID);
 			Treaty currTreaty = (Treaty) masterGK.summits_list.get(new Integer(ID)); 
 			// check for termination by peer 
@@ -227,7 +321,7 @@ public class GateKeeper implements Notifiable {
 						// break;
 					}
 				}
-			}
+			}*/
 		}
 	}
 }

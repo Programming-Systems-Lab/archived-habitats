@@ -7,14 +7,13 @@ import java.util.*;
 public class Habitat {
   String roleName, category;
   Hashtable serviceObjects;
-    
+	GateKeeper gk;
   public Habitat(String name, String c) {
 		roleName = name;
 		category = c;
 		serviceObjects = new Hashtable();
 		FileIO fileRW = new FileIO();
 		Hashtable serviceList;
-		GateKeeper gk;
 		FrontEnd fe;
 		Console ad = new Console();
 
