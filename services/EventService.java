@@ -96,7 +96,12 @@ public class EventService implements ServiceInterface {
 	    button.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent ae) {
 			phaseOneData = text.getText();        
-			phaseOne();
+
+			if (phaseOneData != null) {
+			    phaseOne();
+			} else {
+			    return;
+			}
 		    } 
 		});
 	    
@@ -133,9 +138,12 @@ public class EventService implements ServiceInterface {
 	    
 	    switch (phaseOneProgress) {
 	    case 0:
-		result.put(key1, phaseOneData);
-		phaseOneProgress++;
-		break;
+		if (phaseOneData != null) {
+		    result.put(key1, phaseOneData);
+		    phaseOneProgress++;
+		    break;
+		}
+		return null;
 		
 	    case 1:
 		for (Enumeration e=ipList.keys(); e.hasMoreElements(); ) {
