@@ -101,9 +101,9 @@ public class GateKeeper implements Notifiable {
 		srcService = av.stringValue();
 		av = n.getAttribute("totalPpparams");
 		if (av != null) 
-		int totalIP = av.intValue();
+		int totalIP = av.intValue();						// total imput parameters
 		av = n.getAttribute("totaOPpparams");
-		if (av != null) 
+		if (av != null)													// total output parameters 
 		int totalOP = av.intValue();
 
 		Notification n = new Notification();
@@ -112,10 +112,10 @@ public class GateKeeper implements Notifiable {
 			int ID = getNextID();
 			n.putAttribute("habitatName", srcHabitat);
 			n.putAttribute("EventType", "Response2ServiceRequest");
-			n.putAttribute("Access", "Allowed");
+			n.putAttribute("Access", "Allowed");			// could have used ID only but just in case
 			n.putAttribute("Treaty", "AcceptedAll");	
 			/* AcceptAll = all the ip_params and op_params sent in the 
-			*  request were allowed.
+			*  request were allowed. OR
 			*  New Treaty = the new treaty description follows thsi event 
 			*  that gives a new description of the ip_params and the op_params
 			*  currently only AcceptAll implemented
@@ -142,7 +142,7 @@ public class GateKeeper implements Notifiable {
 				}
 			}
 
-			create_treaty(srcHabitat, roleName, ID, ip, op);
+			create_treaty(srcHabitat, roleName, ID, ip, op,(1+totalIP + totalOp));
 			// create a new treaty and a new proxy for the requested service
 		}
 		else {
@@ -158,13 +158,69 @@ public class GateKeeper implements Notifiable {
 		}
 	}
 	public void processResponse2ServiceRequest(Notification n) {
-	// response to the service request
-	// create a treaty with the params 
-	// save the ID number recieved by the remote GK
-	// notify the service to start using the service
+		AttributeValue = n.getAttribute("Access");
+		if (av != null)
+			if (av.stringValue().equals("Allowed") {
+				AttributeValue = n.getAttribute("ID");
+				if (av != null) int ID = av.intValue();
+				Notification serv_old_notif = (Vector)currServiceReqList.get(serName);
+				Vector ip = get_IP_params_from_Notification(serv_old_notif);
+				Vector op = get_IP_params_from_Notification(serv_old_notif);
+				creaty_treaty(srcHabitat, roleName, ID, ip, op);
+				// masterHabitat.notifyService(); .. wake up the service waiting for this
+				Filter f1 = new Filter();
+				f1.addConstraint("CurrentSummitID", ID);
+				FilterThread f_summit = new FilterThread(f1, new SummitHandler(ID));
+
+			}
+			else {
+				System.out.println("Access Denied");
+				// masterHabitat.notifyService(); .. wake up the service waiting for this failure notification
+			}
+		// response to the service request
+		// create a treaty with the params 
+		// save the ID number recieved by the remote GK
+		// notify the service to start using the service
 	}
+	
+	class SummitHandler implements Notifiable {
+	  int ID;
+		GateKeeper masterGK;
+		public SummitHandler(int _ID, GateKeeper _gk) {
+			ID = _ID;
+			masterGK = _gk;
+		}
+  	public void notify(Notification n) {
+			Treaty currTreaty = (Treaty) masterGK.summits_list.get(ID); 
+			if (n.size() != currTreaty.get_IP_size()) {
+				n.putAttribute("Terminate Summit" , "Invalid number of params");
+				return;
+			} else {
+			Vector ip = (Vector) currTreaty.getIPList();
+			Hashtable forService = new Hashtable();
+			for(int i =0; i < ip.size(); i++) {
+				String ip_par = (String) ip.elementAt(i);
+				AttributeValue av = n.getAttribute(ip_par);
+				if (av!= null) {
+					forService.put(ip_par, av.stringValue());
+				}
+			}
+		}
+		// call the remote service with teh list of params
 
 	public void processSummitEvent(Notification n) {
+		Notification replyNotif = new Notification();
+		AttributeValue av = n.getAttribute("ID");
+		if (av != null) {
+			if summits_list.containsKey(new Integer(av.intValue)) {
+			}
+			else {
+				n.putAttribute("ID", av.intValue());
+				n.putAttribute("habitatNameD", av.intValue());
+				n.putAttribute("Session Terminated", av.intValue());
+
+
+		
 		// get the ID 
 		// gk contacts the summitlist to check if there if it should process it.
 		// check if the i/p param are valid
