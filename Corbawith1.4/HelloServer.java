@@ -1,3 +1,5 @@
+package psl.habitats.services;
+
 import HelloApp.*;
 import org.omg.CosNaming.*;
 import org.omg.CosNaming.NamingContextPackage.*;
@@ -24,10 +26,14 @@ class HelloImpl extends HelloPOA {
   }
 }
 
+public class HelloServer extends psl.habitats.ServiceInterface {
 
-public class HelloServer {
-
-  public static void main(String args[]) {
+	public HelloServer() {
+		roleName = "HelloServer";
+	}
+	
+  // public static void main(String args[]) {
+	 public void initialize() {
 		String init_args[] = {"-ORBInitialPort", "1050", "-ORBInitialHost", "localhost"};
 		System.out.println("init_args" + init_args.length);
     try{
@@ -71,7 +77,8 @@ public class HelloServer {
       }
 	  
       System.out.println("HelloServer Exiting ...");
-	
   }
+	public void startDisplay() {}
+
 }
 
