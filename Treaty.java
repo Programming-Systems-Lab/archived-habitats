@@ -1,5 +1,6 @@
 package psl.habitats;
-import java.util.Vector;
+import java.util.Vector;
+import java.util.Enumeration;
 
 class Treaty {
 	final int ID;
@@ -58,4 +59,14 @@ class Treaty {
 	public boolean valid_op_list(Vector param_list) {
 		return (allowed_retvals.containsAll(param_list));
 	}
+  //////////////////////////////////////////////////////
+	// 				functions for printing
+	//////////////////////////////////////////////////////  public void printIPList() {
+    System.out.println(" Printing IP List ==> ");
+    for (Enumeration e = allowed_params.elements(); e.hasMoreElements(); )
+      System.out.println(" .. " + e.nextElement());  }
+  public void printOPList() {    System.out.println(" Printing OP List ==> ");
+    for (Enumeration e = allowed_retvals.elements(); e.hasMoreElements(); )
+      System.out.println(" .. " + e.nextElement());  }
+	
 }

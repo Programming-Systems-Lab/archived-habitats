@@ -14,11 +14,13 @@ public class Habitat {
 		serviceObjects = new Hashtable();
 		FileIO fileRW = new FileIO();
 		Hashtable serviceList;
-		FrontEnd fe;
-		Console ad = new Console();
 
+    /*
+    FrontEnd fe = new FrontEnd();
+		Console ad = new Console();
 	  ad.cf_show("Admin Frame");
 		ad.cf_show("Admin Console");
+    */
 
 		// read the services 
     if (file == null) file = ".serviceList";
@@ -29,17 +31,20 @@ public class Habitat {
       sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";
 	
 		gk = new GateKeeper(this, sienaMaster);
-		fe = new FrontEnd();
 
     // initialize the services
 		for (Enumeration e = serviceList.elements() ; e.hasMoreElements() ;) {
 	    try {
-				Class t = Class.forName((String)e.nextElement());
-				ServiceInterface s = (ServiceInterface)t.newInstance();
+				Class t = Class.forName((String) e.nextElement());
+				ServiceInterface s = (ServiceInterface) t.newInstance();
 				serviceObjects.put(s.getDescription(), s);
 				s.initialize(this);
-				ad.cf_add("Started sevice " + s.getDescription()+ "\n");
-	    } catch (Exception ex) {
+				// ad.cf_add("Started sevice " + s.getDescription()+ "\n");
+        System.out.println("Started sevice " + s.getDescription()+ "\n");
+        
+        s.startDisplay();
+
+      } catch (Exception ex) {
 				ex.printStackTrace();
 	    }
 		}

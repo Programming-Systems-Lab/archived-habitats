@@ -17,7 +17,7 @@ public class FrontEnd
 {
     public static void main(String[] args)
     {
-	FrontEndFrame frame = new FrontEndFrame();
+	FrontEndFrame frame = new FrontEndFrame();  frame.pack();
 	frame.setVisible(true);
     }
 } // FrontEnd

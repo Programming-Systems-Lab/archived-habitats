@@ -1,3 +1,2 @@
 Maps,psl.habitats.services.MapService
-Hello,psl.habitats.services.HelloServer
 EventListener,psl.habitats.services.EventService
