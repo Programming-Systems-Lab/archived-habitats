@@ -46,11 +46,11 @@ public class ResidentsListService implements ServiceInterface {
     masterHabitat.log(myDescription + ": performService for " + _senderService);
     Hashtable result = new Hashtable();
     if (ipList.containsKey(key1) && ipList.containsKey(key2)) {
-      result.put(key5, lookup(key1, key5, masterHabitat.getName()));
-      result.put(key6, lookup(key1, key6, masterHabitat.getName()));                                                                           
-      result.put(key7, lookup(key1, key7, masterHabitat.getName()));                                                                           
-      result.put(key8, lookup(key1, key8, masterHabitat.getName()));                                                                           
-      result.put(key9, lookup(key1, key9, masterHabitat.getName()));                                                                           
+      result.put(key5, lookup("" + ipList.get(key1), key5, masterHabitat.getName()));
+      result.put(key6, lookup("" + ipList.get(key1), key6, masterHabitat.getName()));                                                                           
+      result.put(key7, lookup("" + ipList.get(key1), key7, masterHabitat.getName()));                                                                           
+      result.put(key8, lookup("" + ipList.get(key1), key8, masterHabitat.getName()));                                                                           
+      result.put(key9, lookup("" + ipList.get(key1), key9, masterHabitat.getName()));                                                                           
     } else 
       result = null;
     masterHabitat.log(myDescription + ": returning requested data ");
@@ -81,7 +81,7 @@ public class ResidentsListService implements ServiceInterface {
     johnHash.put(key5, "DARPA");
     johnHash.put(key6, "(800) SAL-ASIN");
     johnHash.put(key7, "987-65-4321");
-    johnHash.put(key8, "http://www.darpa.mil/ito/images/mr-logo.gif");
+    johnHash.put(key8, "http://www.cs.columbia.edu/~ajs248/intropic.jpg");
     johnHash.put(key9, "18");
   }
 }

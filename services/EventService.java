@@ -48,13 +48,15 @@ public class EventService implements ServiceInterface {
   private String phaseOneData;
 	public JPanel startDisplay(){
     // start the GUI here
-    final JPanel panel = new JPanel(new BorderLayout());    final JLabel label = new JLabel("Enter name: ");
-    final JTextField text = new JTextField(20);    JButton button = new JButton("Search");    
-    final JPanel panel2 = new JPanel(new BorderLayout());    panel2.add(label, BorderLayout.WEST); 
-    panel2.add(text, BorderLayout.CENTER);     panel2.add(button, BorderLayout.EAST);
-    
-    panel.add(panel2, BorderLayout.NORTH);    panel.add(new JLabel("" +
-                         "<html><body>" +                         "Enter: <input><br>" +                         "</body></html>"                         ), BorderLayout.CENTER);    button.addActionListener(new ActionListener() {
+    final JPanel panel = new JPanel(new GridLayout(10, 1));    
+    final JLabel label = new JLabel("Enter name: ");
+    final JTextField text = new JTextField(20);    JButton button = new JButton("Action!");    panel.add(new JLabel("FOR USE BY AUTHORISED PERSONNEL!"));
+    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Type of Event: "));p.add(new JTextField(10));panel.add(p);}    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Available Data: "));p.add(new JTextField(10));panel.add(p);}
+    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Description: "));p.add(new JTextField(10));panel.add(p);}
+    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(label);p.add(text);panel.add(p);}
+    panel.add(button);
+
+    button.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {        phaseOneData = text.getText();        phaseOne();
       }    });    return panel;
   }

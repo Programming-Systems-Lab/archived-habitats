@@ -44,10 +44,10 @@ public class NYCPassListService implements ServiceInterface {
     masterHabitat.log(myDescription + ": performService for " + _senderService);
     Hashtable result = new Hashtable();
     if(ipList.containsKey(key1) || ipList.containsKey(key2)){
-      result.put(key1, lookup(key1, masterHabitat.getName()));
-      result.put(key2, lookup(key2, masterHabitat.getName()));
-      result.put(key3, lookup(key3, masterHabitat.getName()));
-      result.put(key4, lookup(key4, masterHabitat.getName()));
+      result.put(key1, lookup("" + ipList.get(key1), key1, masterHabitat.getName()));
+      result.put(key2, lookup("" + ipList.get(key1), key2, masterHabitat.getName()));
+      result.put(key3, lookup("" + ipList.get(key1), key3, masterHabitat.getName()));
+      result.put(key4, lookup("" + ipList.get(key1), key4, masterHabitat.getName()));
     } else 
       result = null;
     masterHabitat.log(myDescription + ": returning requested Data ");
@@ -55,19 +55,24 @@ public class NYCPassListService implements ServiceInterface {
   }
   
   private static final String HABITAT_NAME = "AmTrak";
-  private String lookup(String key, String forHab) {
+  private String lookup(String key1, String key, String forHab) {
     if (forHab.equals(HABITAT_NAME)) {
-      if (key.equals(key1))
-        return ("John");
-      else if (key.equals(key2))
-        return ("Salasin");
-      else if(key.equals(key3))
-        return ("Texas");
-      else if (key.equals(key4))
-        return new Date().toString();
-      else
-        return null;
-    } else 
-      return null;
+      if (key1.equalsIgnoreCase("john")) return "" + johnHash.get(key);
+      if (key1.equalsIgnoreCase("gail")) return "" + gailHash.get(key);
+    }
+    return null;
+  }
+  private static final Hashtable gailHash = new Hashtable();
+  private static final Hashtable johnHash = new Hashtable();
+  static {
+    gailHash.put(key1, "Gail");
+    gailHash.put(key2, "Kaiser");
+    gailHash.put(key3, "Texas");
+    gailHash.put(key4, "Friday morning");
+
+    johnHash.put(key1, "John");
+    johnHash.put(key2, "Salasin");
+    johnHash.put(key3, "Texas");
+    johnHash.put(key4, "Yesterday");
   }
 }
