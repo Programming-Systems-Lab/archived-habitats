@@ -1,3 +1,5 @@
+package psl.habitats;
+
 import java.awt.*;
 import java.awt.event.*;
 

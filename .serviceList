@@ -1,2 +1,2 @@
-Maps,MapService
-Hello,Corbawith1.4/HelloServer
+Maps,psl.habitats.services.MapService
+Hello,psl.habitats.services.HelloServer

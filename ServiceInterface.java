@@ -1,6 +1,7 @@
+package psl.habitats;
 
 public class ServiceInterface {
-  String roleName;
+  public String roleName;
 
     public ServiceInterface() {}
 
@@ -11,4 +12,6 @@ public class ServiceInterface {
     }
 		
 		public void startDisplay() {}
+
+		// public void startDisplay(Graphics g){} 
 }

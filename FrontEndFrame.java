@@ -1,4 +1,4 @@
-
+package psl.habitats;
 /**
  * FrontEndFrame.java
  *

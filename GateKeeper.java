@@ -1,3 +1,4 @@
+package psl.habitats;
 
 public class GateKeeper {
 

@@ -1,23 +1,4 @@
- /*FileIO.java
- *
- *
- * Created: Tue Oct  2 04:44:27 2001
- *
- * @author Christy Lauridsen
- * @version
- *
- * This class contains methods to read, manipulate, and write data files.
- * Specifically, these methods are designed to work with files of Wisconsin
- * Breast Cancer Data.  It is assumed that the input file contains 569 data
- * sets each with 32 attributes, where the first attribute is an id number, the
- * second is a label ("M" or "B"), and the remaining 30 are decimal numbers.
- *
- * The constructor for this class reads and parses the input file.  The
- * writeRandRowsFile method creates a new data file, randomizing the order of
- * the samples from the input file.  The writeFile method creates a new data
- * file containing only a given number of attributes for each data sample.
- *
- */
+package psl.habitats;
 
 import java.io.*;
 import java.util.*;
