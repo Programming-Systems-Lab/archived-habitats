@@ -2,7 +2,7 @@ package psl.habitats.services;
 import psl.habitats.*;
 
 import java.awt.*;
-import java.awt.event.*;import javax.swing.*;
+import java.awt.event.*;import javax.swing.*;
 
 import java.util.Vector;
 import java.util.Hashtable;
@@ -29,7 +29,7 @@ public class EventService implements ServiceInterface {
   }
   public String getDescription() {
     return myDescription;
-  }
+  }
   public String getDetailDescription(){
     StringBuffer _stringBuffer = new StringBuffer();
     _stringBuffer.setLength(0);
@@ -46,19 +46,68 @@ public class EventService implements ServiceInterface {
   }
 
   private String phaseOneData;
-	public JPanel startDisplay(){
+  public JPanel startDisplay(){
     // start the GUI here
-    final JPanel panel = new JPanel(new GridLayout(20, 1));    
-    final JLabel label = new JLabel("Enter name: ");
-    final JTextField text = new JTextField(20);    JButton button = new JButton("Action!");    panel.add(new JLabel("FOR USE BY AUTHORISED PERSONNEL!"));
-    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Type of Event: "));p.add(new JTextField(10));panel.add(p);}    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Available Data: "));p.add(new JTextField(10));panel.add(p);}
-    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(new JLabel("Description: "));p.add(new JTextField(10));panel.add(p);}
-    {JPanel p = new JPanel(new GridLayout(1, 2));p.add(label);p.add(text);panel.add(p);}
-    panel.add(button);
+    JPanel panel = new JPanel();
+    panel.setLayout(new BorderLayout(0, 10));
+    panel.add(new JLabel("FOR USE BY AUTHORIZED PERSONNEL!", 
+			 SwingConstants.CENTER), "North");
 
-    button.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {        phaseOneData = text.getText();        phaseOne();
-      }    });    return panel;
+    // Set up the entry fields
+    JPanel gridPanel = new JPanel();
+    gridPanel.setLayout(new GridLayout(4,2));
+
+    gridPanel.add(new JLabel("Type of Event: "));
+    gridPanel.add(new JTextField(10));
+
+    gridPanel.add(new JLabel("Available Data: "));
+    gridPanel.add(new JTextField(10));
+
+    gridPanel.add(new JLabel("Description: "));
+    gridPanel.add(new JTextField(10));
+
+    final JLabel label = new JLabel("Enter name: ");
+    final JTextField text = new JTextField(20);
+    gridPanel.add(label);
+    gridPanel.add(text);
+
+    // Stick the fields and buttons together so that they remain adjacent
+    // in the main panel
+    JPanel fieldsAndButtonsPanel = new JPanel();
+    fieldsAndButtonsPanel.setLayout(new BorderLayout());
+    
+    // Now add gridpanel to our parent, but wrap it in a BorderLayout
+    // to "squeeze" it at the top
+    {
+      JPanel fieldPanel = new JPanel();
+      fieldPanel.setLayout(new BorderLayout());
+      fieldPanel.add(gridPanel, "North");
+      fieldsAndButtonsPanel.add(fieldPanel, "North");
+    }
+
+    {
+      // Set up our buttons
+      JPanel buttonPanel = new JPanel();
+      buttonPanel.setLayout(new FlowLayout());
+      JButton button = new JButton("Action!");
+      buttonPanel.add(button);
+      fieldsAndButtonsPanel.add(buttonPanel, "Center");
+
+      button.addActionListener(new ActionListener() {
+	  public void actionPerformed(ActionEvent ae) {
+	    phaseOneData = text.getText();        
+	    phaseOne();
+	  } 
+	});
+
+      panel.add(fieldsAndButtonsPanel, "Center");
+
+    }      
+
+
+    // Put the whole thing into a BorderLayout so that it squeezes up nicely
+    panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+    return panel;
   }
   
   private static final String PHASE_ONE_PEER = "NYC_Passengers_Query";
