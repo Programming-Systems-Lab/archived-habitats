@@ -28,9 +28,11 @@ class HelloImpl extends HelloPOA {
 public class HelloServer {
 
   public static void main(String args[]) {
+		String init_args[] = {"-ORBInitialPort", "1050", "-ORBInitialHost", "localhost"};
+		System.out.println("init_args" + init_args.length);
     try{
       // create and initialize the ORB
-      ORB orb = ORB.init(args, null);
+      ORB orb = ORB.init(init_args, null);
 
       // get reference to rootpoa & activate the POAManager
       POA rootpoa = (POA)orb.resolve_initial_references("RootPOA");
