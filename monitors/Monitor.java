@@ -30,6 +30,8 @@ class Monitor //extends JFrame
 
 	(f.getContentPane()).add((TextAreaPanel)monitors.get(name));
 
+	f.validate();
+
 	if (noframe) {
 	    (f.getContentPane()).setLayout(new GridLayout(0,2));
 	    f.setSize(500, 500);
@@ -48,6 +50,7 @@ class Monitor //extends JFrame
     void removemonitor(String svcname) {
 	try {
 	    f.remove((Component)monitors.get(svcname));
+	    f.validate();
 	    monitors.remove(svcname);
 	} catch (Exception e) {
 	}
