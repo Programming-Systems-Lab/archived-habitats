@@ -12,6 +12,7 @@ public class ServiceInterface {
     }
 		
 		public void startDisplay() {}
+		public Vector performService(Hashtable ipList) {}
 
 		// public void startDisplay(Graphics g){} 
 }

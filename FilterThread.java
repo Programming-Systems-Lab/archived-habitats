@@ -2,18 +2,18 @@ import java.lang.*;
 import siena.*;
 
 class FilterThread extends Thread {
-	public Filter f;
+	public Filter f1;
 	public Notifiable interestedParty;
 	public Siena s = null;
 
 	public FilterThread(Siena sie, Filter f, Notifiable c) {
-		filter = f;
+		f1 = f;
 		interestedParty = c;
 		s = sie;
 	}
 
 	public void run() {
-		if ((!interestedParty) || (!filter)) { 
+		if ((interestedParty == null) || (f1 == null)) { 
 			// Alpa: need to do something like exit 
 		}
 		try {

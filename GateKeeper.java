@@ -13,6 +13,7 @@ import org.omg.CORBA.*;
 public class GateKeeper implements Notifiable {
 	static private Habitat masterHabitat;
 	static private Hashtable summits_list; 
+	static private Hashtable currServiceReqList; 
 	static private String sienaMaster = "senp://canal.psl.cs.columbia.edu:31331";
 
 	public GateKeeper(Habitat h) {
@@ -46,15 +47,13 @@ public class GateKeeper implements Notifiable {
 		if(av == "ServiceRequest");
 			processServiceRequest(n);
 		if(av == "Response2ServiceRequest");
-			processServiceRequest(n);
-		if(av == "currentSummit");
-			processSummitEvent(n);
+			processResponse2ServiceRequest(n);
 	}
   public void notify(Notification[] e) {}
 
 	public void broadcast_req(String serName, siena.Notification n) {
-		n.putAttribute("source", masterHabitat);
-		n.putAttribute("requestingService", serName);
+		n.putAttribute("source", masterHabitat.getName());
+		n.putAttribute("requestingService", serName);     
 		try {
 			n.publish();
 		} catch(siena.InvalidHandleException se) {
@@ -63,115 +62,108 @@ public class GateKeeper implements Notifiable {
 		currServiceReqList.put(serName, n);
 	}
 
-	private void create_treaty(String src, String dest, int ID, java.lang.Object ip_param, java.lang.Object ret_param) {
-		Treaty curr_treaty = new Treaty(src, dest, ID);
+	private void create_treaty(String src, String dest, int ID, java.lang.Object ip_param, java.lang.Object ret_param, int numIP) {
+		Treaty curr_treaty = new Treaty(src, dest, ID, numIP);
 		if (ip_param instanceof Vector) {
-			curr_treaty.add_ip_list(ip_param);
+			curr_treaty.add_ip_list((Vector)ip_param);
 		}
-		else 
-			curr_treaty.add_ip_param(ip_param);
-		summits_list.put(ID,curr_treaty);
+		else curr_treaty.add_ip_param(ip_param);
+		summits_list.put(new Integer(ID),curr_treaty);
 	}
-	private boolean valid_ip(int ID, Object param) {
-		Treaty curr_treaty = (Treaty) summits_list.get(ID);
-    if (param instanceof Vector) {
-      return (curr_treaty.valid_ip_list(param));
-    }
-    else 
-      return (curr_treaty.valid_ip_param(param));
-  }
-	public void forwardMessage(int ID, siena.Notification n) {
-		// service will use this to talk to remote services in a current session i.e. after security clearance
-		// check if param are valid o/p params
-		// and then publish 
+	private int getNextID() {
+		return 0;
 	}
 
-	public void processServiceRequest(Notification n) {
+	public void processServiceRequest(Notification n_request) {
 		// do some simple security clearance
 		// assign an ID number
 		// create a new treaty and add it to the list of sumits
 		// if security cleared create a proxy of the service object
 
 		String srcHabitat, srcService;
-		AttributeValue av = n.getAttribute("source");
+		int totalIP, totalOP;
+		Notification res_notif = new Notification();
+		AttributeValue av = n_request.getAttribute("source");
 		if (av != null) 
-		srcHabitat = av.stringValue();
-		av = n.getAttribute("requestingService");
-		if (av != null) 
-		srcService = av.stringValue();
-		av = n.getAttribute("totalPpparams");
-		if (av != null) 
-		int totalIP = av.intValue();						// total imput parameters
-		av = n.getAttribute("totaOPpparams");
-		if (av != null)													// total output parameters 
-		int totalOP = av.intValue();
-
-		Notification n = new Notification();
-		if(allowed(srcHabitat,srcService) {
+			srcHabitat = av.stringValue();
+		av = n_request.getAttribute("requestingService");
+		if (av != null) srcService = av.stringValue();
+		av = n_request.getAttribute("totalPpparams");
+		if (av != null) totalIP = av.intValue();						// total imput parameters
+		av = n_request.getAttribute("totaOPpparams");
+		if (av != null)	
+			totalOP = av.intValue(); 	// total output parameters 
+		if(allowed(srcHabitat,srcService)) {
 			// send a +ve response
 			int ID = getNextID();
-			n.putAttribute("habitatName", srcHabitat);
-			n.putAttribute("EventType", "Response2ServiceRequest");
-			n.putAttribute("Access", "Allowed");			// could have used ID only but just in case
-			n.putAttribute("Treaty", "AcceptedAll");	
+			res_notif.putAttribute("habitatName", srcHabitat);
+			res_notif.putAttribute("EventType", "Response2ServiceRequest");
+			res_notif.putAttribute("Access", "Allowed");			// could have used ID only but just in case
+			res_notif.putAttribute("Treaty", "AcceptedAll");	
 			/* AcceptAll = all the ip_params and op_params sent in the 
 			*  request were allowed. OR
 			*  New Treaty = the new treaty description follows thsi event 
 			*  that gives a new description of the ip_params and the op_params
 			*  currently only AcceptAll implemented
 			*/
-			n.putAttribute("requestingService" , srcService);
-			n.putAttribute("IDnumber", ID); 
+			res_notif.putAttribute("requestingService" , srcService);
+			res_notif.putAttribute("IDnumber", ID); 
 			
 			Vector ip = new Vector();
 			Vector op = new Vector();
-			for (int ind =1; ind <= totalIPparams; ind++) {
+			int ind;
+			for (ind =1; ind <= totalIP; ind++) {
 				String att = "param";
 				att += ind;
-				av = n.getAttribute(att);
+				av = n_request.getAttribute(att);
 				if (av != null) {
-					ip.add(av.stringValue())
+					ip.add(av.stringValue());
 				}
 			}
-			for (ind =1; ind <= totalOPparams; ind++) {
+			for (ind =1; ind <= totalOP; ind++) {
 				String att = "retParam";
 				att += ind;
-				av = n.getAttribute(att);
+				av = n_request.getAttribute(att);
 				if (av != null) {
-					op.add(av.stringValue())
+					op.add(av.stringValue());
 				}
 			}
-
-			create_treaty(srcHabitat, roleName, ID, ip, op,(1+totalIP + totalOp));
+			create_treaty(srcHabitat, masterHabitat.getName(), ID, ip, op,(1+totalIP));
 			// create a new treaty and a new proxy for the requested service
 		}
 		else {
 			// send a -ve response
-			n.putAttribute("habitatName", srcHabitat);
-			n.putAttribute("EventType", "Response2ServiceRequest");
-			n.putAttribute("Access", "Denied");
+			res_notif.putAttribute("habitatName", srcHabitat);
+			res_notif.putAttribute("EventType", "Response2ServiceRequest");
+			res_notif.putAttribute("Access", "Denied");
 		}
 		try {
-			s.publish(n);
+			s.publish(res_notif);
 		} catch (siena.SienaException se) {
 			se.printStackTrace();
 		}
 	}
+	private Vector get_IP_params_from_Notification(Notification n) {
+		return (new Vector());
+	}
 	public void processResponse2ServiceRequest(Notification n) {
-		AttributeValue = n.getAttribute("Access");
-		if (av != null)
-			if (av.stringValue().equals("Allowed") {
+		AttributeValue av = n.getAttribute("Access");
+		int ID;
+		if (av != null) {
+			if ((av.stringValue()).equals("Allowed")) {
 				AttributeValue = n.getAttribute("ID");
-				if (av != null) int ID = av.intValue();
-				Notification serv_old_notif = (Vector)currServiceReqList.get(serName);
-				Vector ip = get_IP_params_from_Notification(serv_old_notif);
-				Vector op = get_IP_params_from_Notification(serv_old_notif);
-				creaty_treaty(srcHabitat, roleName, ID, ip, op);
+				if (av != null) {
+					ID = av.intValue();
+					Notification serv_old_notif = (Vector)currServiceReqList.get(serName);
+					Vector ip = get_IP_params_from_Notification(serv_old_notif);
+					Vector op = get_IP_params_from_Notification(serv_old_notif);
+					String srcHabitat = serv_old_notif.getAttribute("habitatName").stringValue();
+					creaty_treaty(srcHabitat, masterHabitat.getName(), ID, ip, ip.size());
 				// masterHabitat.notifyService(); .. wake up the service waiting for this
-				Filter f1 = new Filter();
-				f1.addConstraint("CurrentSummitID", ID);
-				FilterThread f_summit = new FilterThread(f1, new SummitHandler(ID));
-
+					Filter f1 = new Filter();
+					f1.addConstraint("CurrentSummitID", ID);
+					FilterThread f_summit = new FilterThread(f1, new SummitHandler(ID, this));
+					}
 			}
 			else {
 				System.out.println("Access Denied");
@@ -182,6 +174,7 @@ public class GateKeeper implements Notifiable {
 		// save the ID number recieved by the remote GK
 		// notify the service to start using the service
 	}
+}
 	
 	class SummitHandler implements Notifiable {
 	  int ID;
@@ -190,40 +183,42 @@ public class GateKeeper implements Notifiable {
 			ID = _ID;
 			masterGK = _gk;
 		}
+  	public void notify(Notification n[]) {}
   	public void notify(Notification n) {
-			Treaty currTreaty = (Treaty) masterGK.summits_list.get(ID); 
-			if (n.size() != currTreaty.get_IP_size()) {
-				n.putAttribute("Terminate Summit" , "Invalid number of params");
+			Notification send_notif = new Notification();
+			send_notif.putAttribute("currentSummitID", ID);
+			Treaty currTreaty = (Treaty) masterGK.summits_list.get(new Integer(ID)); 
+			// check for termination by peer 
+			if (send_notif.size() != currTreaty.get_IP_size()) {
+				send_notif.putAttribute("Terminate Summit" , "Invalid number of params");
 				return;
-			} else {
-			Vector ip = (Vector) currTreaty.getIPList();
-			Hashtable forService = new Hashtable();
-			for(int i =0; i < ip.size(); i++) {
-				String ip_par = (String) ip.elementAt(i);
-				AttributeValue av = n.getAttribute(ip_par);
-				if (av!= null) {
-					forService.put(ip_par, av.stringValue());
+			} else { 
+				Vector ip = (Vector) currTreaty.getIPList();
+			  Hashtable forService = new Hashtable();
+			  for(int i =0; i < ip.size(); i++) {
+			  	String ip_par = (String) ip.elementAt(i);
+			  	AttributeValue av = send_notif.getAttribute(ip_par);
+			  	if (av!= null) {
+			  		forService.put(ip_par, av.stringValue()); // need to pass the list to the params
+			  	}
+			  }
+
+				// this must be replaced by a lookup on a corba object
+				ServiceInterface _service = masterHabitat.getService(currTreaty.servUsed);
+				Vector result2Bsent = _service.performService(forService);
+
+				for (int _v = 0; _v < result2Bsent.size(); _v++) {
+					MyAttributeValuePair _avp = (MyAttributeValuePair) result2Bsent.elementAt(_v);
+					if(currTreaty.valid_op_list(_avp.getValue) {
+						send_notif.putAttribute(_avp.attribute,_avp.getValue);
+					}
+					else {
+						send_notif.clear();
+						send_notif.putAttribute("Terminate Summit" , "Invalid number of params");
+						// break;
+					}
 				}
 			}
 		}
-		// call the remote service with teh list of params
-
-	public void processSummitEvent(Notification n) {
-		Notification replyNotif = new Notification();
-		AttributeValue av = n.getAttribute("ID");
-		if (av != null) {
-			if summits_list.containsKey(new Integer(av.intValue)) {
-			}
-			else {
-				n.putAttribute("ID", av.intValue());
-				n.putAttribute("habitatNameD", av.intValue());
-				n.putAttribute("Session Terminated", av.intValue());
-
-
-		
-		// get the ID 
-		// gk contacts the summitlist to check if there if it should process it.
-		// check if the i/p param are valid
-		// contact the service and call forward mesg with results.
-	}
+	};
 }

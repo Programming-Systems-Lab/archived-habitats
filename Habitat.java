@@ -40,15 +40,18 @@ public class Habitat {
 	    }
 		}
 	
-		gk = new GateKeeper();
+		gk = new GateKeeper(this);
 		fe = new FrontEnd();
   }
-		public String getName() {
-			return roleName;
-		}
-		public String getCategory() {
-			return category;
-		}
+	public String getName() {
+		return roleName;
+	}
+	public String getCategory() {
+		return category;
+	}
+	public ServiceInterface getService(String _svdes) {
+		return((ServiceInterface)serviceObjects.get(_svdes));
+	}
 
   public static void main(String arg[]) {
 	  Habitat myFirstHabitat = new Habitat("AlpaChristy", "general");
