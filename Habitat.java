@@ -3,10 +3,14 @@ package psl.habitats;
 import java.io.*;
 import java.util.*;
 
+import psl.habitats.portal.HabitatPortal;
+
 
 public class Habitat {
   String roleName, category;
   Hashtable serviceObjects;
+  HabitatPortal hp = null;
+  
 	public final GateKeeper gk;
   public Habitat(String name, String c, String file, String sienaMaster) {
 		roleName = name;
@@ -42,13 +46,14 @@ public class Habitat {
 				// ad.cf_add("Started sevice " + s.getDescription()+ "\n");
         System.out.println("Started sevice " + s.getDescription()+ "\n");
         
-        s.startDisplay();
+        // s.startDisplay();
 
       } catch (Exception ex) {
 				ex.printStackTrace();
 	    }
 		}
-	
+    
+    hp = new HabitatPortal(name, serviceObjects.elements());	
   }
 	public String getName() {
 		return roleName;
@@ -61,6 +66,9 @@ public class Habitat {
 	}
   static public boolean localService(String servDes) {
     return false;
+  }
+  public void log(String msg) {
+    hp.log(msg);
   }
   
   private static void usage() {

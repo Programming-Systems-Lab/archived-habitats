@@ -1,1 +1,2 @@
 TexasResidentInfo,psl.habitats.services.ResidentsListService
+AlertService,psl.habitats.services.AlertService

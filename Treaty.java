@@ -61,12 +61,13 @@ class Treaty {
 	}
   //////////////////////////////////////////////////////
 	// 				functions for printing
-	//////////////////////////////////////////////////////  public void printIPList() {
-    System.out.println(" Printing IP List ==> ");
-    for (Enumeration e = allowed_params.elements(); e.hasMoreElements(); )
-      System.out.println(" .. " + e.nextElement());  }
-  public void printOPList() {    System.out.println(" Printing OP List ==> ");
-    for (Enumeration e = allowed_retvals.elements(); e.hasMoreElements(); )
-      System.out.println(" .. " + e.nextElement());  }
-	
+	//////////////////////////////////////////////////////  public String printIPList() {    StringBuffer sb = new StringBuffer(" Printing IP List ==> ");
+    if (allowed_retvals.size() > 0) {      for (Enumeration e = allowed_params.elements(); e.hasMoreElements(); )
+        sb.append(" .. " + e.nextElement());
+    }
+    return sb + "";  }
+  public String printOPList() {    StringBuffer sb = new StringBuffer(" Printing OP List ==> ");
+    if (allowed_retvals.size() > 0) {    for (Enumeration e = allowed_retvals.elements(); e.hasMoreElements(); )
+      sb.append(" .. " + e.nextElement());
+    }    return sb + "";  }	
 }

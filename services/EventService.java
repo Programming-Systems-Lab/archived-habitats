@@ -1,6 +1,9 @@
 package psl.habitats.services;
 import psl.habitats.*;
 
+import java.awt.*;
+import java.awt.event.*;import javax.swing.*;
+
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -18,18 +21,42 @@ public class EventService implements ServiceInterface {
   private static final String key5 = "Address";
   private static final String key6 = "Telephone";
   private static final String key7 = "SSN";
-  private static final String key8 = "Image";
-  private static final String key9 = "Age";
+  private static final String key8 = "Age";
+  private static final String key9 = "Image";
 
   public void initialize(Habitat _h){
     masterHabitat = _h;
   }
-  public String getDescription(){
+  public String getDescription() {
     return myDescription;
+  }
+  public String getDetailDescription(){
+    StringBuffer _stringBuffer = new StringBuffer();
+    _stringBuffer.setLength(0);
+    _stringBuffer.append("<html><body>");
+    _stringBuffer.append("<h1>" + getDescription() + "</h1>");
+    _stringBuffer.append("<table border=4>");
+    _stringBuffer.append("<tr><td>Purpose</td><td>Receive and Update Events </td></tr>");
+    _stringBuffer.append("<tr><td>Availablity</td><td>Local</td></tr>");
+    _stringBuffer.append("<tr><td>Monitor</td><td>True</td></tr>");
+    _stringBuffer.append("<tr><td>Monitor-Mode</td><td>Text</td></tr>");
+    _stringBuffer.append("</table>");
+    _stringBuffer.append("</body></html>");
+    return _stringBuffer + "";
   }
-	public void startDisplay(){
+
+  private String phaseOneData;
+	public JPanel startDisplay(){
     // start the GUI here
-    phaseOne();
+    final JPanel panel = new JPanel(new BorderLayout());    final JLabel label = new JLabel("Enter name: ");
+    final JTextField text = new JTextField(20);    JButton button = new JButton("Search");    
+    final JPanel panel2 = new JPanel(new BorderLayout());    panel2.add(label, BorderLayout.WEST); 
+    panel2.add(text, BorderLayout.CENTER);     panel2.add(button, BorderLayout.EAST);
+    
+    panel.add(panel2, BorderLayout.NORTH);    panel.add(new JLabel("" +
+                         "<html><body>" +                         "Enter: <input><br>" +                         "</body></html>"                         ), BorderLayout.CENTER);    button.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) {        phaseOneData = text.getText();        phaseOne();
+      }    });    return panel;
   }
   
   private static final String PHASE_ONE_PEER = "NYC_Passengers_Query";
@@ -47,13 +74,12 @@ public class EventService implements ServiceInterface {
     return "" + sb;
   }
   public Hashtable performService(String _senderService, Hashtable ipList) {
-    System.out.println(myDescription + ": performService - " + _senderService);
     Hashtable result = new Hashtable();
     if(_senderService.equals(PHASE_ONE_PEER)) {
-      System.out.println(": performService :: PHASE_ONE_PEER" + phaseOneProgress);
+      masterHabitat.log(myDescription + " :: PHASE_ONE_PEER " + PHASE_ONE_PEER);
       switch (phaseOneProgress) {
       case 0:
-        result.put(key1, "Alpa");
+        result.put(key1, phaseOneData);
         phaseOneProgress++;
         break;
         
@@ -62,6 +88,7 @@ public class EventService implements ServiceInterface {
           String key = e.nextElement().toString();
           informationCatalogue.put(key, ipList.get(key));
         }
+        masterHabitat.log(myDescription + ":: Terminating Session with " + PHASE_TWO_PEER);
         result.put("Terminate_Session", "SESSION_ENDED");
         phaseOneProgress = 0;
         
@@ -72,7 +99,7 @@ public class EventService implements ServiceInterface {
       }
       
     } else if(_senderService.equals(PHASE_TWO_PEER)) {
-      System.out.println(": performService :: PHASE_TWO_PEER" + phaseTwoProgress);
+      masterHabitat.log(myDescription + ":: PHASE_TWO_PEER " + PHASE_TWO_PEER);
       switch (phaseTwoProgress) {
       case 0:
         result.put(key1, informationCatalogue.get(key1));
@@ -86,6 +113,7 @@ public class EventService implements ServiceInterface {
           informationCatalogue.put(key, ipList.get(key));
         }
         result.put("Terminate_Session", "SESSION_ENDED");
+				masterHabitat.log(myDescription + " Terminating Session with " + PHASE_TWO_PEER);
         phaseTwoProgress = 0;
 
         // initiate phase-III
@@ -94,34 +122,41 @@ public class EventService implements ServiceInterface {
 
       }
     } else if(_senderService.equals(PHASE_THREE_PEER)) {
-      System.out.println(": performService :: PHASE_THREE_PEER" + phaseThreeProgress);
+      masterHabitat.log(myDescription + ":: PHASE_THREE_PEER" + PHASE_THREE_PEER);
       switch (phaseThreeProgress) {
       case 0:
         for (Enumeration e=informationCatalogue.keys(); e.hasMoreElements(); ) {
           String key = e.nextElement().toString();
           if (key.equals(key3) || key.equals(key4)) continue;
           result.put(key, informationCatalogue.get(key));
+          // masterHabitat.log("$$$$$$$$Sending this " + key);
         }
         phaseThreeProgress++;
         break;
         
       case 1:
         phaseThreeProgress = 0;
+				masterHabitat.log(myDescription + " Terminating Session with " + PHASE_THREE_PEER);
         result.put("Terminate_Session", "SESSION_ENDED");
         break;
-        
       }
     }
 
-    System.out.println(myDescription + ": performService, returning: " + hashtableListing(result));
+    masterHabitat.log(myDescription + ": performService, returning: " + hashtableListing(result));
     return result;
   } 
   private void phaseOne() {
+		masterHabitat.log(myDescription + " Received some new Info - processing it .. ");
+		masterHabitat.log(myDescription + " Number of Steps Suggested -> 3 "); 
+    masterHabitat.log(myDescription + " Entering Phase One ");
+		masterHabitat.log(myDescription + " Need to gather information on 'NYC Passengers'" ); 
+		masterHabitat.log(myDescription + " Contact Habitat -> 'NYCTransitHabitat'");
+		masterHabitat.log(myDescription + " Contact Service -> 'NYC_Passengers_Query'");
+		
     // invoked by user entering chor's name
     // some intelligent workflow suggested that service to be contacted
-    System.out.println(myDescription + ": phaseOne");
     String useService = "NYC_Passengers_Query";
-    if (!Habitat.localService(useService)) {
+    if(!Habitat.localService(useService)) {
       Hashtable ipList = new Hashtable();
       ipList.put("habitatCategory","NYCTransitHabitat");
       ipList.put("EventType","ServiceRequest");
@@ -135,12 +170,13 @@ public class EventService implements ServiceInterface {
       ipList.put("retvals4", key4);
       
       masterHabitat.gk.broadcast_req(myDescription, useService, ipList);
+			masterHabitat.log(myDescription + " Requesting Gatekeeper to contact Remote Service");
     }
-    System.out.println(myDescription + ": phaseOne, returned");
+    masterHabitat.log(myDescription + ": phaseOne, returned");
   }
   
   private void phaseTwo() {
-    System.out.println(myDescription + ": phaseTwo");
+    masterHabitat.log(myDescription + ": phaseTwo");
     String useService = "TexasResidentInfo";
     if (!Habitat.localService(useService)) {
       Hashtable ipList = new Hashtable();
@@ -159,18 +195,18 @@ public class EventService implements ServiceInterface {
       
       masterHabitat.gk.broadcast_req(myDescription, useService, ipList);
     }
-    System.out.println(myDescription + ": phaseTwo, returned");
+    masterHabitat.log(myDescription + ": phaseTwo, returned");
   }
   
   private void phaseThree() {  
-    System.out.println(myDescription + ": phaseThree");
+    masterHabitat.log(myDescription + ": phaseThree");
     String useService = "AlertService";
     if (!Habitat.localService(useService)) {
       Hashtable ipList = new Hashtable();
       ipList.put("habitatCategory","NYCTransitHabitat");
       ipList.put("EventType","ServiceRequest");
       ipList.put("Request4Service", useService);
-      ipList.put("totalParams","2");
+      ipList.put("totalParams","7");
       ipList.put("params1", key1);
       ipList.put("params2", key2);
       ipList.put("params3", key5);
@@ -182,7 +218,7 @@ public class EventService implements ServiceInterface {
       
       masterHabitat.gk.broadcast_req(myDescription, useService, ipList);
     }
-    System.out.println(myDescription + ": phaseThree, returned");
+    masterHabitat.log(myDescription + ": phaseThree, returned");
   }
 
 }

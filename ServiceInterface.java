@@ -1,14 +1,13 @@
 package psl.habitats;
 
-import siena.*;
-
-import java.util.Vector;
+import javax.swing.JPanel;
 import java.util.Hashtable;
 
 public interface ServiceInterface {
   public void initialize(Habitat _h);
   public String getDescription();
-	public void startDisplay();
+	public JPanel startDisplay();
+  public String getDetailDescription();
   public Hashtable performService(String _senderService, Hashtable ipList);
-	// public void startDisplay(Graphics g){} 
+	// public void startDisplay(Graphics g){}
 }

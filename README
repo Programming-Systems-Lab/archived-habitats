@@ -1,0 +1,11 @@
+NOTE : ServiceList for any habitat is in the services directory !
+Step 1: Start Siena
+	java -cp siena-1.2.0.jar siena.StartServer -host canal -port 31331
+
+Step 2: Start the Amtrak and Texas services
+	java psl.habitats.Habitat AmTrak NYCTransitHabitat  -sl .AmTrakServiceList -sm senp://canal:31331
+	java psl.habitats.Habitat Texas TexasStateHabitat -sl .TexasServiceList -sm senp://canal:31331
+
+Step 3: Start the NYPD Habitat
+	java psl.habitats.Habitat NYPD NYPD -sl .NYPDServiceList -sm senp://canal:31331
+
